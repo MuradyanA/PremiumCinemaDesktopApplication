@@ -1,0 +1,11 @@
+<RCC>
+  <qresource prefix="users">
+    <file>Icons/users.png</file>
+  </qresource>
+  <qresource prefix="icons">
+    <file>Icons/magnifier.png</file>
+  </qresource>
+  <qresource prefix="tickets">
+    <file>Icons/payments.png</file>
+  </qresource>
+</RCC>

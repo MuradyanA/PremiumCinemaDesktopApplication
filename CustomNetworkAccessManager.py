@@ -1,7 +1,7 @@
 import json
 import time
 
-from PySide6.QtCore import QUrl, Signal, QEventLoop, QObject
+from PySide6.QtCore import QUrl, Signal, QEventLoop, QObject, QUrlQuery
 from PySide6.QtNetwork import QNetworkAccessManager, QNetworkRequest, QNetworkReply
 
 from Exceptions.TokenIsMissingException import TokenIsMissingException
@@ -14,17 +14,22 @@ class CustomNetworkAccessManager(QNetworkAccessManager, QObject):
 
     def __init__(self, url, auth=True):
         super().__init__()
-        self._request = QNetworkRequest(QUrl(url))
+        self._url = QUrl(url)
+        self._request = None
         self._reply = None
         self._data = None
         self._auth = auth
+        self.queryString = ""
 
     def get(self):
+        self._prepareRequest()
         self._addHeader()
+        self._request
+        url = self._request.url()
         self._reply = super().get(self._request)
-        loop = QEventLoop()
+        # loop = QEventLoop()
         self._reply.finished.connect(self.handleResponse)
-        loop.exec_()
+        # loop.exec_()
 
     def post(self):
         pass
@@ -61,11 +66,13 @@ class CustomNetworkAccessManager(QNetworkAccessManager, QObject):
                         return
         else:
             # Handle the error
-            print("Error:", self._reply.errorString())
+            print("Error:", self._reply.readAll())
+        self.queryString = ""
 
     def getTabularData(self):
-        # print(self._data)
         tabularData = []
+        if len(self._data) ==0:
+            return tabularData
         for dict in self._data['data']:
             row = []
             for key, value in dict.items():
@@ -73,3 +80,12 @@ class CustomNetworkAccessManager(QNetworkAccessManager, QObject):
             tabularData.append(row)
 
         return tabularData
+
+    def setQueryParams(self, params):
+        query = QUrlQuery()
+        for key, (oper, value) in params.items():
+            query.addQueryItem(f"{key}[{oper}]", f"{value}")
+        self._url.setQuery(query)
+
+    def _prepareRequest(self):
+        self._request = QNetworkRequest(QUrl(self._url))

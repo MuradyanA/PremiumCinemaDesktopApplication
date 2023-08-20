@@ -385,6 +385,7 @@
    <addaction name="actionCancelPayment"/>
    <addaction name="actionViewDetails"/>
    <addaction name="actionEditUser"/>
+   <addaction name="actionSettings"/>
   </widget>
   <action name="actionCancelPayment">
    <property name="enabled">
@@ -430,6 +431,21 @@
    </property>
    <property name="toolTip">
     <string>Edit User</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="icon">
+    <iconset resource="icons.qrc">
+     <normaloff>:/settings/Icons/settings.png</normaloff>:/settings/Icons/settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Settings</string>
+   </property>
+   <property name="toolTip">
+    <string>Application Settings</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

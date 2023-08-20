@@ -2,6 +2,9 @@
   <qresource prefix="users">
     <file>Icons/users.png</file>
   </qresource>
+  <qresource prefix="settings">
+    <file>Icons/settings.png</file>
+  </qresource>
   <qresource prefix="edit">
     <file>Icons/edit.png</file>
   </qresource>

@@ -9,6 +9,7 @@ from PaymentsDetailsManager import PaymentsDetailsManager
 from PaymentsDetailsModel import PaymentsDetailsModel
 from PaymentsModel import PaymentsModel
 from Ui_MainWindow import Ui_MainWindow
+from SettingsDialog import SettingsDialog
 from datetime import datetime
 
 from Ui_UpdateUserDialog import Ui_UpdateUserDialog
@@ -17,14 +18,15 @@ from UsersModel import UsersModel
 from PaymentsDetails import PaymentsDetails
 
 class MainWindow(QMainWindow, Ui_MainWindow):
-    def __init__(self, app):
+    def __init__(self, app, settings):
         super().__init__()
         self.setupUi(self)
-        self.baseUrl = 'http://localhost/api/'
-        self.usersNetManager = CustomNetworkAccessManager(self.baseUrl + "users")
+        self.settings = settings
+        self.baseUrl = settings.get_param('servicePath')
+        self.usersNetManager = CustomNetworkAccessManager(self.baseUrl + "/users")
         self.actionEditUser.setVisible(False)
 
-        self.paymentNetManager = CustomNetworkAccessManager(self.baseUrl + "payments")
+        self.paymentNetManager = CustomNetworkAccessManager(self.baseUrl + "/payments")
         self.paymentsTableView.setSelectionBehavior(QAbstractItemView.SelectRows)
 
         self.usersTableView.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -66,6 +68,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.paymentsDetailsModel = [[]]
         self.paymentsDetails = PaymentsDetails()
         self.actionViewDetails.triggered.connect(self.openPaymentsDetailsWindow)
+
+        self.actionSettings.triggered.connect(self.openSettingsDialog)
 
     def processPaymentData(self, url):
         if url == 'http://localhost/api/payments':
@@ -187,4 +191,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             QMessageBox.critical(self, 'Undefined Payer', 'Please select the payer in the table')
             return
         self.paymentsDetails.exec()
+
+    def openSettingsDialog(self):
+        settings_dialog = SettingsDialog()
+        settings_dialog.lServicePath.setText(self.settings.get_param('servicePath'))
+        dlg = settings_dialog.exec()
+
+        if dlg == QDialog.Accepted:
+            self.settings.set_param('servicePath', settings_dialog.lServicePath.text())
 

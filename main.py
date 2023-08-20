@@ -7,15 +7,17 @@ from CustomNetworkAccessManager import CustomNetworkAccessManager
 from LoginDialog import LoginDialog
 from MainWindow import MainWindow
 from PySide6.QtWidgets import QApplication, QWidget
+from AppSetings import AppSetting
+settings = AppSetting()
 
 
 def run_main_window():
-    window = MainWindow(app)
+    window = MainWindow(app, settings)
     window.show()
 
 
 app = QtWidgets.QApplication(sys.argv)
-login_net_manager = CustomNetworkAccessManager('http://localhost/api')
+login_net_manager = CustomNetworkAccessManager(settings.get_param('servicePath'))
 login_net_manager.completed.connect(run_main_window)
 login_dialog = LoginDialog()
 login_dialog.exec()

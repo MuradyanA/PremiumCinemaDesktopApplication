@@ -24,7 +24,7 @@ login_dialog.exec()
 
 data = {'email': login_dialog.lLogin.text(), 'password': login_dialog.lPassword.text()}
 
-login_net_manager.post('login', json.dumps(data).encode())
+login_net_manager.post(json.dumps(data).encode(), 'login')
 
 app.exec()
 

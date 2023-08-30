@@ -20,17 +20,25 @@ class CustomNetworkAccessManager(QNetworkAccessManager, QObject):
         self._url = url
         self._request = None
         self._reply = None
-        self._query = None
+        self.query = None
         self._data = None
         self._auth = auth
         self.queryString = ""
 
-    def _request_with_body(self, suffix, body, request_type):
-        method = getattr(super(), request_type)
-        self._prepareRequest(suffix)
-        self._addHeader()
-        self._reply = method(self._request, QByteArray(body))
-        self._reply.finished.connect(self.handleResponse)
+
+    def _request_with_body(self, body, request_type, suffix=None):
+        if suffix != 'login':
+            method = getattr(super(), request_type)
+            self._prepareRequest(suffix)
+            self._addHeader()
+            self._reply = method(self._request, QByteArray(body))
+            self._reply.finished.connect(self.handleResponse)
+        else:
+            method = getattr(super(), request_type)
+            self._prepareRequest(suffix)
+            self._addHeader('login')
+            self._reply = method(self._request, QByteArray(body))
+            self._reply.finished.connect(self.handleResponse)
 
     def get(self, suffix=None, return_type='col'):
         if suffix is not None:
@@ -43,19 +51,20 @@ class CustomNetworkAccessManager(QNetworkAccessManager, QObject):
         self._reply.finished.connect(self.handleResponse)
         # loop.exec_()
 
-    def post(self, suffix, body):
-        self._request_with_body(suffix, body, 'post')
+    def post(self, body, suffix=None):
+        self._request_with_body(body, 'post', suffix)
 
-    def put(self, suffix, body):
-        self._request_with_body(suffix, body, 'put')
+    def put(self, body, suffix=None):
+        self._request_with_body(body, 'put', suffix)
 
-    def _addHeader(self):
-        if self._auth and self.token is None:
-            raise TokenIsMissingException()
+    def _addHeader(self, suffix=None):
+        if suffix is None:
+            if self._auth and self.token is None:
+                raise TokenIsMissingException()
 
-        if self.token:
-            bearertoken = f"Bearer {self.token}"
-            self._request.setRawHeader(b"Authorization", bearertoken.encode('utf-8'))
+            if self.token:
+                bearertoken = f"Bearer {self.token}"
+                self._request.setRawHeader(b"Authorization", bearertoken.encode('utf-8'))
 
         # self._request.setHeader(QNetworkRequest.ContentTypeHeader, "application/json")
         self._request.setRawHeader(b"Accept", b"application/json")
@@ -111,9 +120,9 @@ class CustomNetworkAccessManager(QNetworkAccessManager, QObject):
         return self._data['data']
 
     def setQueryParams(self, params):
-        self._query = QUrlQuery()
+        self.query = QUrlQuery()
         for key, (oper, value) in params.items():
-            self._query.addQueryItem(f"{key}[{oper}]", f"{value}")
+            self.query.addQueryItem(f"{key}[{oper}]", f"{value}")
 
     def _prepareRequest(self, suffix=None):
         if suffix is not None:
@@ -121,7 +130,7 @@ class CustomNetworkAccessManager(QNetworkAccessManager, QObject):
         else:
             url = QUrl(self._url)
 
-        if self._query is not None:
-            url.setQuery(self._query)
+        if self.query is not None:
+            url.setQuery(self.query)
 
         self._request = QNetworkRequest(url)

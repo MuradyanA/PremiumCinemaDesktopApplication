@@ -37,7 +37,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.usersNetManager.completed.connect(self.populateUsersTable)
 
-        self.paymentNetManager.get()
+        self.searchPayers()
 
         self.actionCancelPayment.triggered.connect(self.cancelPayment)
         self.btnTickets.clicked.connect(lambda: self.switchPage(1))
@@ -72,12 +72,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.actionSettings.triggered.connect(self.openSettingsDialog)
 
     def processPaymentData(self, url):
-        if url == 'http://localhost/api/payments':
-            self.paymentModel = PaymentsModel(self.paymentNetManager.getTabularData(), self._paymentsHeaders)
-            self.paymentsTableView.setModel(self.paymentModel)
-        elif url.startswith('http://localhost/api/payments'):
+        splited_url = url.split('/')
+        if len(splited_url) == 6:  # View payment details
             payment_details = self.paymentNetManager.get_data()
-            print(payment_details)
             self.paymentsDetailsModel = PaymentsDetailsModel(self.paymentNetManager.getTabularData(
                 payment_details['tickets']),
                 self._paymentsDetailsHeaders)
@@ -94,6 +91,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.paymentsDetails.tSeanceTime.setEnabled(False)
             self.paymentsDetails.seanceDate.setEnabled(False)
             self.paymentsDetails.paymentsDetailsTableView.setModel(self.paymentsDetailsModel)
+        else:
+            self.paymentModel = PaymentsModel(self.paymentNetManager.getTabularData(), self._paymentsHeaders)
+            self.paymentsTableView.setModel(self.paymentModel)
 
     def populateUsersTable(self):
         self.userModel = UsersModel(self.usersNetManager.getTabularData(), self._usersHeaders)
@@ -134,7 +134,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             payment_id = payment_list[index.row()][0]
             self.statusBar().showMessage("Updating data...", 2000)
 
-            self.paymentNetManager.put(payment_id, b'{"status": "cancelled"}')
+            self.paymentNetManager.put(b'{"status": "cancelled"}', payment_id)
 
     def viewDetails(self):
         pass
@@ -179,7 +179,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             if user_account_status != updated_user_account_status or user_is_admin != updated_user_is_admin:
                 is_admin = True if updated_user_is_admin == 'Admin' else False
                 data = {'status': updated_user_account_status, 'isAdmin': is_admin}
-                self.usersNetManager.put(user_id, json.dumps(data).encode())
+                self.usersNetManager.put(json.dumps(data).encode(), user_id)
                 # self.usersNetManager.put(user_id, ''.join(format(ord(i), '08b') for i in json.dumps(data)))
 
     def openPaymentsDetailsWindow(self):

@@ -84,7 +84,7 @@ class Ui_LoginDialog(object):
     # setupUi
 
     def retranslateUi(self, LoginDialog):
-        LoginDialog.setWindowTitle(QCoreApplication.translate("LoginDialog", u"Dialog", None))
+        LoginDialog.setWindowTitle(QCoreApplication.translate("LoginDialog", u"Log In", None))
         self.label.setText(QCoreApplication.translate("LoginDialog", u"Log In", None))
         self.lLogin.setText("")
         self.lLogin.setPlaceholderText(QCoreApplication.translate("LoginDialog", u"Email", None))

@@ -1,6 +1,8 @@
 import json
 import os
 
+from PySide6.QtWidgets import QMessageBox
+
 from Exceptions.ParamDoesntExistsExcepion import ParamDoesntExistsException
 
 
@@ -22,6 +24,11 @@ class AppSetting:
         try:
             return AppSetting.params[param_name]
         except KeyError as e:
+            QMessageBox.critical(
+                None,
+                "Service Path Error",
+                'Service Path is not initialized.\nPlease open settings.json file and provide the path as in the example. \n{"servicePath": "YOUR PATH"}'
+            )
             raise ParamDoesntExistsException(e.args[0])
 
     def set_param(self, param_name, value):
